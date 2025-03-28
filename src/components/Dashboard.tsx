@@ -25,7 +25,7 @@ import {
 } from '@mui/material';
 import { useNavigate } from 'react-router-dom';
 import SearchIcon from '@mui/icons-material/Search';
-import EditIcon from '@mui/icons-material/Edit';
+
 import DeleteIcon from '@mui/icons-material/Delete';
 import MenuIcon from '@mui/icons-material/Menu';
 import ArrowDownwardIcon from '@mui/icons-material/ArrowDownward';
@@ -37,8 +37,10 @@ interface Workflow {
   _id: string;
   name: string;
   description: string;
-  createdAt: string;
-  updatedAt: string;
+  nodes: Array<{ id: string; text: string }>;
+  lastEditedBy?: { name: string; email: string };
+  createdAt?: string;
+  updatedAt?: string;
   status?: 'Passed' | 'Failed' | 'In Progress' | 'Not Started';
 }
 
@@ -58,11 +60,14 @@ const Dashboard = () => {
   const fetchWorkflows = async () => {
     try {
       const data = await workflowService.getAll();
-      // Add dummy status for demonstration
-      const workflowsWithStatus = data.map(w => ({
-        ...w,
-        status: ['Passed', 'Failed', 'In Progress', 'Not Started'][Math.floor(Math.random() * 4)] as Workflow['status']
-      }));
+      // Filter out any workflows without _id and add status
+      const workflowsWithStatus = data
+        .filter((w: any) => w._id) // ensure _id exists
+        .map((w: any) => ({
+          ...w,
+          _id: w._id, // ensure _id is explicitly included
+          status: ['Passed', 'Failed', 'In Progress', 'Not Started'][Math.floor(Math.random() * 4)] as Workflow['status']
+        }));
       setWorkflows(workflowsWithStatus);
       setError('');
     } catch (err) {
@@ -221,7 +226,7 @@ const Dashboard = () => {
                       <TableCell>{workflow.name}</TableCell>
                       <TableCell>{workflow.description}</TableCell>
                       <TableCell>
-                        {new Date(workflow.updatedAt).toLocaleDateString()}
+                        {new Date(workflow?.updatedAt || new Date()).toLocaleDateString()}
                       </TableCell>
                       <TableCell>
                         <Box sx={{ display: 'flex', gap: 1 }}>
@@ -359,7 +364,7 @@ const Dashboard = () => {
             />
           </ListItem>
           <Divider />
-          <ListItem button onClick={handleSignout}>
+          <ListItem  onClick={handleSignout}>
             <ListItemIcon>
               <LogoutIcon sx={{ color: '#E94F37' }} />
             </ListItemIcon>
