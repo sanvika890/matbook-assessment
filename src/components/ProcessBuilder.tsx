@@ -12,7 +12,6 @@ import {
   CircularProgress,
   Alert,
   Snackbar,
-  Paper
 } from '@mui/material';
 import { useState, useEffect } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
